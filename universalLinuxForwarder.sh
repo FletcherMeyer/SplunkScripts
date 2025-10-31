@@ -20,27 +20,27 @@ FRWD_CONNECT_FAILED = 0
 
 # Should some servers be able to reach the GUI? Maybe.
 # Should some servers not be able to reach the GUI? Maybe.
-if [ GUI_CONNECT_FAILED == 1 ]:
+if [ GUI_CONNECT_FAILED == 1 ]; then
   echo "[-] Unable to reach webpage. Non-fatal. Continuing."
 else
   echo "[+] Able to reach webpage. Is this necessary?"
+fi
   
-if [ FRWD_CONNECT_FAILED == 1 ]:
-  # Some actions within the forwarder require authentication.
+if [ FRWD_CONNECT_FAILED == 1 ]; then
   # We should end this and ensure proper connections are in place.
   echo "[-] Unable to forward. Fatal! Ending..."
   exit(1)
 else
   echo "[+] Able to forward. Continuing."
+fi
 
-
-read -s -p "[o] Pretty please enter the password for this server's Splunk instance (Your choice): " pswd
+read -s -p "[o] Pretty please enter the password for this server's Splunk instance, splunkadmin. (Your choice): " pswd
 
 if command -v apt-get &> /dev/null; then
   echo "[+] Package Manager detected: apt-get"
   echo "[+] Ensuring packages are up to date."
   sudo apt-get install -f
-  
+
   cd ~
   
   echo "[+] Retrieving universal forwarder."
@@ -48,19 +48,20 @@ if command -v apt-get &> /dev/null; then
   
   echo "[+] Installing universal forwarder."
   sudo dpkg -i splunk_forwarder.deb
+fi
 
-  echo "[+] Starting universal forwarder with license acceptance."
-  sudo /opt/splunkforwarder/bin/splunk start --accept-license --answer-yes --no-prompt --seed-passwd $pswd
+echo "[+] Starting universal forwarder with license acceptance."
+sudo /opt/splunkforwarder/bin/splunk start --accept-license --answer-yes --no-prompt --seed-passwd $pswd
   
-  echo "[+] Forwarding is enabled at boot-start."
-  sudo /opt/splunkforwarder/bin/splunk enable boot-start
+echo "[+] Forwarding is enabled at boot-start."
+sudo /opt/splunkforwarder/bin/splunk enable boot-start
 
-  echo "[+] Authenticating as admin."
-  sudo /opt/splunkforwarder/bin/splunk login -auth admin:$pswd
+echo "[+] Authenticating as admin."
+sudo /opt/splunkforwarder/bin/splunk login -auth splunkadmin:$pswd
   
-  echo "[+] Adding forwarding server over port $PORT to host $INDEXER_IP."
-  sudo /opt/splunkforwarder/bin/splunk add forward-server $INDEXER_IP:$PORT
+echo "[+] Adding forwarding server over port $PORT to host $INDEXER_IP."
+sudo /opt/splunkforwarder/bin/splunk add forward-server $INDEXER_IP:$PORT
   
-  echo "[+] Adding monitor to '/var/log/syslog'."
-  sudo /opt/splunkforwarder/bin/splunk add monitor /var/log/syslog
-  sudo /opt/splunkforwarder/bin/splunk add monitor /var/log/audit.log
+echo "[+] Adding monitor to '/var/log/syslog'."
+sudo /opt/splunkforwarder/bin/splunk add monitor /var/log/syslog
+sudo /opt/splunkforwarder/bin/splunk add monitor /var/log/audit.log
