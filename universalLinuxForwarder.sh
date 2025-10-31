@@ -35,7 +35,6 @@ else
 
 
 read -s -p "[o] Pretty please enter the password for this server's Splunk instance (Your choice): " pswd
-read -s -p "[o] Pretty please enter the password for the Splunk server's admin (Splunk admin's choice): " admPswd
 
 if command -v apt-get &> /dev/null; then
   echo "[+] Package Manager detected: apt-get"
@@ -57,10 +56,11 @@ if command -v apt-get &> /dev/null; then
   sudo /opt/splunkforwarder/bin/splunk enable boot-start
 
   echo "[+] Authenticating as admin."
-  sudo /opt/splunkforwarder/bin/splunk login -auth admin:$admPswd
+  sudo /opt/splunkforwarder/bin/splunk login -auth admin:$pswd
   
   echo "[+] Adding forwarding server over port $PORT to host $INDEXER_IP."
   sudo /opt/splunkforwarder/bin/splunk add forward-server $INDEXER_IP:$PORT
   
   echo "[+] Adding monitor to '/var/log/syslog'."
   sudo /opt/splunkforwarder/bin/splunk add monitor /var/log/syslog
+  sudo /opt/splunkforwarder/bin/splunk add monitor /var/log/audit.log
